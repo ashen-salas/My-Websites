@@ -1,0 +1,244 @@
+/* Estilos básicos para réplica NatGeo Latam */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    background: #ffffff;
+    color: #222;
+}
+.ng-topbar {
+    width: 100%;
+    height: 25px;
+    background: #000000;
+    display: flex;
+    align-items: center;
+    position:static;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.ng-topbar p{
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 0.6rem;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    position: relative;
+    background: transparent;
+}
+
+.ng-topbar-link {
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 0.6rem;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    position: relative;
+    background: transparent;
+    margin-left: 165vh;
+}
+.ng-header {
+    background: #fff;
+    border-bottom: 1px solid #f0e6e6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-top: 18px;
+}
+.ng-logo {
+    height: 25px;
+    margin-top: 5px;
+}
+.ng-nav {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 10px;
+}
+.ng-nav a {
+    color: #222;
+    text-decoration: none;
+    margin-right: 50px;
+    margin-top: 8px;
+    font-weight:750;
+    transition: color 0.2s;
+}
+.ng-nav a:hover {
+    color: #ffd700;
+}
+.ng-main {
+    max-width: 900px;
+    margin: 2rem auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 2rem;
+}
+.ng-main section {
+    margin-bottom: 2.5rem;
+}
+.ng-main h2 {
+    color: #ffd700;
+    border-left: 6px solid #ffd700;
+    padding-left: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+.ng-main article {
+    margin-bottom: 0.8rem;
+}
+.ng-main article a {
+    color: #0077b6;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+.ng-main article a:hover {
+    text-decoration: underline;
+    color: #ffd700;
+}
+.ng-footer {
+    background: #000000;
+    color: #fff;
+    text-align: center;
+    padding: 1.5rem 0 1rem 0;
+    margin-top: 2rem;
+}
+.ng-footer a {
+    color: #ffd700;
+    text-decoration: none;
+    margin: 0 0.5rem;
+}
+.ng-footer a:hover {
+    text-decoration: underline;
+}
+.ng-footer p {
+    margin: 1rem 0 0 0;
+    font-size: 0.95rem;
+    color: #eae3e3;
+}
+
+.ng-hero {
+    display: flex;
+    flex-wrap: wrap;
+    background: #000;
+    color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    min-height: 320px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.ng-hero-img {
+    flex: 1 1 320px;
+    min-width: 320px;
+    max-width: 50%;
+    overflow: hidden;
+}
+.ng-hero-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.ng-hero-content {
+    flex: 1 1 320px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 280px;
+}
+.ng-hero-content h1 {
+    font-size: 2.1rem;
+    margin: 0 0 1rem 0;
+    color: #ffd700;
+}
+.ng-hero-content p {
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+}
+.ng-btn {
+    background: #ffd700;
+    color: #222;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s;
+    display: inline-block;
+}
+.ng-btn:hover {
+    background: #b99f09;
+}
+
+.ng-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+.ng-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.ng-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+}
+.ng-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.ng-card-content {
+    padding: 1.2rem 1rem 1.2rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.ng-card-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: #222;
+    font-size: 1.15rem;
+}
+.ng-card-content p {
+    color: #444;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+.ng-card-content a {
+    color: #0077b6;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.ng-card-content a:hover {
+    color: #ffd700;
+    text-decoration: underline;
+}
+@media (max-width: 800px) {
+    .ng-hero {
+        flex-direction: column;
+    }
+    .ng-hero-img, .ng-hero-content {
+        max-width: 100%;
+        min-width: 0;
+    }
+}
