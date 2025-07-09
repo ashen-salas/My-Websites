@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector de Proyectos</title>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #181818;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .main-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 320px;
+        }
+        .main-btns button {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px #0003;
+        }
+        .main-btns button:hover {
+            background: #4837c7;
+            color: #fff;
+            transform: translateY(-2px) scale(1.03);
+        }
+        h1 {
+            color: #fff;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Abrir Portafolio</h1>
+    <div class="main-btns">
+        <button onclick="location.href='Websites/Portfolio/index.html'">Portfolio</button>
+    </div>
+    <h1>Abrir Proyectos</h1>
+    <div class="main-btns">
+        <button onclick="location.href='Websites/NatGeo/index.html'">NatGeo</button>
+        <button onclick="location.href='Websites/Weather/index.html'">Weather</button>
+        <button onclick="location.href='Websites/GhostTune/index.html'">GhostTune</button>
+    </div>
+</body>
+</html>
