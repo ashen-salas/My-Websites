@@ -16,7 +16,12 @@
     </div>
     <header class="ng-header">
         <img src="objects/NatGeo.png" alt="National Geographic Logo" class="ng-logo">
-        <nav class="ng-nav">
+        <div class="hamburger" id="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <nav class="ng-nav" id="main-nav">
             <a href="#inicio">INICIO</a>
             <a href="#actualidad">ACTUALIDAD</a>
             <a href="#dinosaurios">DINOSAURIOS</a>
@@ -191,5 +196,19 @@
         <a href="https://www.nationalgeographicla.com/tema/contenido/viaje-y-aventuras" target="_blank">Viajes</a>
         <p>&copy; 2025 Réplica educativa de NatGeo Latam</p>
     </footer>
+    <script>
+// Menú hamburguesa para navegación responsive
+const hamburger = document.getElementById('hamburger-menu');
+const nav = document.getElementById('main-nav');
+hamburger.addEventListener('click', () => {
+    nav.classList.toggle('open');
+});
+// Cierra el menú al hacer click en un enlace
+nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+        nav.classList.remove('open');
+    });
+});
+</script>
 </body>
 </html>
