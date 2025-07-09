@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizador de Código - GhostTune</title>
+    <style>
+    body {
+        background: #1e1e1e;
+        color: #ffffff;
+        font-family: monospace;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+        pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background: #2d2d2d;
+        padding: 20px;
+        border-radius: 8px;
+        overflow: auto;
+        max-height: 90vh;
+    }
+        code {
+        color: #dcdcdc;
+    }
+    </style>
+</head>
+    <body>
+    <h1>GhostTune - Código fuente HTML</h1>
+    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;es&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;GhostTune - Tu Spotify&lt;/title&gt;
+    &lt;style&gt;
+/*  IMPORTACIONES   */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&amp;display=swap');
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #181818;
+    color: #fff;
+    overflow: hidden;
+}
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 220px;
+    height: 100vh;
+    background: #121212;
+    padding: 20px 0 0 20px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+.sidebar h2 {
+    margin-bottom: 30px;
+    color: #00F0FF;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar ul li {
+    margin: 15px 0;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.sidebar ul li:hover {
+    color: #00F0FF;
+}
+.playlists h3 {
+    margin-top: 40px;
+    color: #b3b3b3;
+    font-size: 1em;
+}
+.main-content {
+    margin-left: 240px;
+    padding: 40px 30px;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+.album-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 36px;
+    margin-top: 30px;
+    height: 100%;
+}
+.album {
+    background: #282828;
+    border-radius: 14px;
+    padding: 18px 10px 10px 10px;
+    text-align: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    transition: background 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    height: 210px;
+    overflow: hidden;
+}
+.album:hover {
+    background: #333;
+}
+.album img {
+    width: 100%;
+    max-width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px #0005;
+}
+.album p {
+    margin: 0;
+    font-size: 1em;
+    color: #fff;
+    word-break: break-word;
+}
+.player {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 90px;
+    background: rgba(10, 10, 10);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 80px 0 20px;
+    box-sizing: border-box;
+    z-index: 101;
+}
+.song-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.song-info img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+}
+.song-title {
+    font-weight: bold;
+    margin: 0;
+}
+.song-artist {
+    color: #b3b3b3;
+    margin: 0;
+    font-size: 0.9em;
+}
+.controls button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5em;
+    margin: 0 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.controls button:hover {
+    color: #00F0FF
+}
+    &lt;/style&gt;
+    &lt;link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class=&quot;sidebar&quot;&gt;
+        &lt;h2&gt;GhostTune&lt;/h2&gt;
+        &lt;ul&gt;
+            &lt;li&gt;Buscar&lt;/li&gt;
+            &lt;li&gt;Biblioteca&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;div class=&quot;playlists&quot;&gt;
+            &lt;h3&gt;Playlists&lt;/h3&gt;
+            &lt;ul&gt;
+                &lt;li&gt;Rock&lt;/li&gt;
+                &lt;li&gt;Pop&lt;/li&gt;
+                &lt;li&gt;Filocalista&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;main-content&quot;&gt;
+        &lt;h1&gt;Bienvenido a GhostTune, tu app de musica gratuita&lt;/h1&gt;
+        &lt;div class=&quot;album-list&quot;&gt;
+            &lt;div class=&quot;album&quot;&gt;
+                &lt;img src=&quot;Albums/okComputer.jpg&quot; alt=&quot;Album 1&quot;&gt;
+                &lt;p&gt;Ok Computer&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;!-- Resto de álbumes omitido para brevedad --&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;player&quot;&gt;
+        &lt;div class=&quot;song-info&quot;&gt;
+            &lt;img src=&quot;Objects/vinilo.gif&quot; alt=&quot;Song&quot;&gt;
+            &lt;div&gt;
+                &lt;p class=&quot;song-title&quot;&gt;Unknown Clue&lt;/p&gt;
+                &lt;p class=&quot;song-artist&quot;&gt;Artist&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;controls&quot;&gt;
+            &lt;button id=&quot;prev&quot;&gt;&lt;i class='bx bx-skip-previous'&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;button id=&quot;play&quot;&gt;&lt;i class='bx bx-play'&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;button id=&quot;next&quot;&gt;&lt;i class='bx bx-skip-next'&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;button id=&quot;rept&quot;&gt;&lt;i class='bx bx-repeat-alt'&gt;&lt;/i&gt;&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;audio id=&quot;audio-player&quot;&gt;&lt;/audio&gt;
+    &lt;script&gt;
+// Aquí van todos los scripts...
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+    </code></pre>
+</body>
+</html>
