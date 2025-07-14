@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar tarea</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar tarea</h2>
+        <form class="formEdit" action="/actualizar/{{ tarea[0] }}" method="post">
+            <input class="text" type="text" name="contenido" value="{{ tarea[1] }}" required>
+            <input type="date" name="fecha" value="{{ tarea[2] }}" required>
+            <button type="submit">Guardar cambios</button>
+        </form>
+        <a href="/"> Volver </a>
+    </div>
+</body>
+</html>

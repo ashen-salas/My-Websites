@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do | Ashen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+        <div class="container">
+        <h1>To-Do by Ashen</h1>
+
+        <form action="/agregar" method="post" class="form-nueva-tarea">
+            <input type="text" name="contenido" placeholder="Nueva tarea" required>
+            <input type="date" name="fecha" required>
+            <button type="submit">Agregar</button>
+        </form>
+
+        <h2>Actividades Activas</h2>
+        <ul class="lista-tareas">
+            {% for tarea in activas %}
+                <li class="{{ 'fijada' if tarea[4] else '' }}">
+                    <div>
+                        <strong>{{ tarea[1] }}</strong><br>
+                        <small><i class='bx  bx-calendar-alt'  ></i>  {{ tarea[2] }}</small>
+                    </div>
+                    <div class="acciones">
+                        <form action="/completar" method="post">
+                            <input type="hidden" name="id" value="{{ tarea[0] }}">
+                            <button title="Completar"><i class='bx  bx-check'  ></i> </button>
+                        </form>
+                        <form action="/fijar" method="post">
+                            <input type="hidden" name="id" value="{{ tarea[0] }}">
+                            <button title="Fijar"><i class='bx  bx-bookmark'  ></i> </button>
+                        </form>
+                        <button><a href="/editar/{{ tarea[0] }}"><i class='bx  bx-edit'  ></i> </a></button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Actividades Realizadas</h2>
+        <ul class="lista-tareas realizadas">
+            {% for tarea in realizadas %}
+                <li>
+                    <s>{{ tarea[1] }}</s><br>
+                    <small><i class='bx  bx-calendar-check'  ></i>  {{ tarea[2] }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
