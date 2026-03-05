@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SemáforoIA — Panel de Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --panel: #0f1318;
+    --border: #1e2530;
+    --red: #ff2d2d;
+    --yellow: #ffcc00;
+    --green: #00e676;
+    --dim-red: #3a0a0a;
+    --dim-yellow: #2e2400;
+    --dim-green: #003318;
+    --blue: #00b4ff;
+    --text: #c8d8e8;
+    --muted: #4a5a6a;
+    --glow-red: 0 0 20px #ff2d2d88, 0 0 40px #ff2d2d44;
+    --glow-yellow: 0 0 20px #ffcc0088, 0 0 40px #ffcc0044;
+    --glow-green: 0 0 20px #00e67688, 0 0 40px #00e67644;
+    --glow-blue: 0 0 12px #00b4ff66;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Grid bg */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,180,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,180,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .logo-main {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .logo-main span {
+    color: var(--blue);
+    text-shadow: var(--glow-blue);
+  }
+
+  .logo-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0a1a0a;
+    border: 1px solid #00e67633;
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--green);
+    letter-spacing: 2px;
+  }
+
+  .pulse-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: var(--glow-green);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 240px 1fr;
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 16px;
+  }
+
+  /* INTERSECTION card */
+  .intersection-card {
+    grid-column: 2;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .intersection-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .intersection-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* LANE CARDS */
+  .lane-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s;
+  }
+
+  .lane-card.active {
+    border-color: var(--green);
+    box-shadow: inset 0 0 40px rgba(0,230,118,0.04);
+  }
+
+  .lane-card::before {
+    content: attr(data-lane);
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    font-size: 7rem;
+    font-weight: 800;
+    color: rgba(255,255,255,0.02);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .lane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .lane-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+
+  .lane-id {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 3px;
+  }
+
+  .badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border: 1px solid;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .badge.verde  { color: var(--green); border-color: var(--green); background: var(--dim-green); box-shadow: var(--glow-green); }
+  .badge.rojo   { color: var(--red);   border-color: var(--red);   background: var(--dim-red);   box-shadow: var(--glow-red); }
+  .badge.amarillo { color: var(--yellow); border-color: var(--yellow); background: var(--dim-yellow); box-shadow: var(--glow-yellow); }
+
+  /* TRAFFIC LIGHT */
+  .semaphore {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin: 0 auto 20px;
+    width: 68px;
+  }
+
+  .sem-housing {
+    background: #1a1d22;
+    border: 2px solid #2a2f38;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .sem-pole {
+    width: 8px;
+    height: 30px;
+    background: linear-gradient(to bottom, #2a2f38, #1a1d22);
+    margin: 0 auto;
+  }
+
+  .sem-base {
+    width: 32px;
+    height: 6px;
+    background: #2a2f38;
+    border-radius: 2px;
+    margin: 0 auto;
+  }
+
+  .light {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .light.r { background: var(--dim-red); }
+  .light.y { background: var(--dim-yellow); }
+  .light.g { background: var(--dim-green); }
+
+  .light.r.on { background: var(--red); box-shadow: var(--glow-red); }
+  .light.y.on { background: var(--yellow); box-shadow: var(--glow-yellow); animation: blink-yellow 1s ease-in-out infinite; }
+  .light.g.on { background: var(--green); box-shadow: var(--glow-green); }
+
+  @keyframes blink-yellow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* STATS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stat-box {
+    background: #080b0e;
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .stat-value.highlight { color: var(--blue); text-shadow: var(--glow-blue); }
+
+  /* CAR COUNTER VISUAL */
+  .car-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .car-bar-fill {
+    height: 100%;
+    background: var(--blue);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px var(--blue);
+  }
+
+  /* TIMER BAR */
+  .timer-section {
+    margin-top: 8px;
+  }
+
+  .timer-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .timer-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .timer-fill {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 0.1s linear;
+  }
+
+  .timer-fill.verde  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .timer-fill.amarillo { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  .timer-fill.rojo   { background: var(--red); box-shadow: 0 0 6px var(--red); width: 0% !important; }
+
+  /* PRIORITY BAR */
+  .priority-row {
+    display: flex;
+    gap: 3px;
+    margin-top: 6px;
+  }
+
+  .priority-pip {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 1px;
+    transition: all 0.3s;
+  }
+
+  .priority-pip.filled { background: var(--blue); box-shadow: var(--glow-blue); }
+
+  /* BOTTOM BAR */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .info-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .panel-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* LOG */
+  .log-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+    grid-column: 1 / -1;
+  }
+
+  .log-list {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 110px;
+    overflow-y: auto;
+  }
+
+  .log-entry {
+    display: flex;
+    gap: 12px;
+    color: var(--muted);
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .log-time { color: var(--blue); min-width: 70px; }
+  .log-msg.ev-verde   { color: var(--green); }
+  .log-msg.ev-amarillo { color: var(--yellow); }
+  .log-msg.ev-rojo    { color: var(--red); }
+  .log-msg.ev-info    { color: var(--text); }
+
+  /* DECISION LOGIC VISUAL */
+  .decision-display {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .decision-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  .decision-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    font-size: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .decision-icon.active { border-color: var(--blue); color: var(--blue); box-shadow: var(--glow-blue); }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    box-shadow: var(--glow-blue);
+  }
+
+  .btn.active {
+    background: rgba(0,180,255,0.1);
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  /* ARDUINO STATUS */
+  .arduino-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .arduino-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: var(--glow-green);
+  }
+
+  /* Intersection SVG road */
+  .road-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+
+  .car-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    margin-top: 4px;
+  }
+
+  .car-dots {
+    display: flex;
+    gap: 2px;
+  }
+
+  .car-dot {
+    width: 8px; height: 6px;
+    background: var(--border);
+    border-radius: 1px;
+    transition: all 0.3s;
+  }
+
+  .car-dot.filled { background: var(--blue); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .intersection-card { grid-column: 1 / -1; grid-row: 1; flex-direction: row; justify-content: center; }
+    .bottom-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div>
+        <div class="logo-main">Uno Por V<span>IA</span></div>
+        <div class="logo-sub">Sistema de Control con PID v2.0</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="status-pill">
+        <div class="pulse-dot"></div>
+        SIMULACION
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN TRAFFIC LIGHTS -->
+  <div class="main-grid">
+
+    <!-- LANE A -->
+    <div class="lane-card" data-lane="A" id="cardA">
+      <div class="lane-header">
+        <div>
+          <div class="lane-id">CARRIL · CAM-0</div>
+          <div class="lane-title">Vía A</div>
+        </div>
+        <div class="badge rojo" id="badgeA">ROJO</div>
+      </div>
+
+      <div class="semaphore">
+        <div class="sem-housing">
+          <div class="light r on" id="lightA-r"></div>
+          <div class="light y" id="lightA-y"></div>
+          <div class="light g" id="lightA-g"></div>
+        </div>
+        <div class="sem-pole"></div>
+        <div class="sem-base"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Vehículos</div>
+          <div class="stat-value highlight" id="countA">0</div>
+          <div class="car-bar"><div class="car-bar-fill" id="barA" style="width:0%"></div></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Prioridad</div>
+          <div class="stat-value" id="prioA">0<span style="font-size:1rem;color:var(--muted)">/2</span></div>
+          <div class="priority-row" id="pipA">
+            <div class="priority-pip"></div>
+            <div class="priority-pip"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-section">
+        <div class="timer-label">
+          <span>TIEMPO EN ESTADO</span>
+          <span id="timerTextA">0s</span>
+        </div>
+        <div class="timer-track">
+          <div class="timer-fill rojo" id="timerFillA" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERSECTION CENTER -->
+    <div class="intersection-card">
+      <div class="intersection-label">Intersección</div>
+      <svg class="intersection-icon" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Roads -->
+        <rect x="44" y="0" width="32" height="120" fill="#1a1d22"/>
+        <rect x="0" y="44" width="120" height="32" fill="#1a1d22"/>
+        <!-- Road lines -->
+        <line x1="60" y1="0" x2="60" y2="44" stroke="#ffcc0044" stroke-width="2" stroke-dasharray="6 4"/>
+        <line x1="60" y1="76" x2="60" y2="120" stroke="#ffcc0044" stroke-width="2" stroke-dasharray="6 4"/>
+        <line x1="0" y1="60" x2="44" y2="60" stroke="#ffcc0044" stroke-width="2" stroke-dasharray="6 4"/>
+        <line x1="76" y1="60" x2="120" y2="60" stroke="#ffcc0044" stroke-width="2" stroke-dasharray="6 4"/>
+        <!-- Center -->
+        <rect x="44" y="44" width="32" height="32" fill="#0f1318"/>
+        <!-- Active road glow -->
+        <rect x="44" y="0" width="32" height="44" id="roadA-glow" fill="transparent"/>
+        <rect x="44" y="76" width="32" height="44" id="roadA-glow2" fill="transparent"/>
+        <rect x="0" y="44" width="44" height="32" id="roadB-glow" fill="transparent"/>
+        <rect x="76" y="44" width="44" height="32" id="roadB-glow2" fill="transparent"/>
+        <!-- Labels -->
+        <text x="60" y="14" text-anchor="middle" fill="#4a5a6a" font-size="8" font-family="'Share Tech Mono', monospace">A</text>
+        <text x="60" y="114" text-anchor="middle" fill="#4a5a6a" font-size="8" font-family="'Share Tech Mono', monospace">A</text>
+        <text x="8" y="63" text-anchor="middle" fill="#4a5a6a" font-size="8" font-family="'Share Tech Mono', monospace">B</text>
+        <text x="112" y="63" text-anchor="middle" fill="#4a5a6a" font-size="8" font-family="'Share Tech Mono', monospace">B</text>
+      </svg>
+      <div style="text-align:center;">
+        <div class="intersection-label" style="margin-bottom:4px;">ACTIVO</div>
+        <div style="font-size:2.2rem;font-weight:800;color:#fff;" id="activeLabel">VÍA A</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px;">CICLO VERDE</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--blue);">30s</div>
+      </div>
+    </div>
+
+    <!-- LANE B -->
+    <div class="lane-card" data-lane="B" id="cardB">
+      <div class="lane-header">
+        <div>
+          <div class="lane-id">CARRIL · CAM-2</div>
+          <div class="lane-title">Vía B</div>
+        </div>
+        <div class="badge rojo" id="badgeB">ROJO</div>
+      </div>
+
+      <div class="semaphore">
+        <div class="sem-housing">
+          <div class="light r on" id="lightB-r"></div>
+          <div class="light y" id="lightB-y"></div>
+          <div class="light g" id="lightB-g"></div>
+        </div>
+        <div class="sem-pole"></div>
+        <div class="sem-base"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Vehículos</div>
+          <div class="stat-value highlight" id="countB">0</div>
+          <div class="car-bar"><div class="car-bar-fill" id="barB" style="width:0%"></div></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Prioridad</div>
+          <div class="stat-value" id="prioB">0<span style="font-size:1rem;color:var(--muted)">/2</span></div>
+          <div class="priority-row" id="pipB">
+            <div class="priority-pip"></div>
+            <div class="priority-pip"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-section">
+        <div class="timer-label">
+          <span>TIEMPO EN ESTADO</span>
+          <span id="timerTextB">0s</span>
+        </div>
+        <div class="timer-track">
+          <div class="timer-fill rojo" id="timerFillB" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM INFO -->
+  <div class="bottom-grid">
+
+    <!-- DECISION LOGIC -->
+    <div class="info-panel">
+      <div class="panel-title">Lógica de Decisión</div>
+      <div class="decision-display">
+        <div class="decision-row">
+          <div class="decision-icon" id="dec1">01</div>
+          <span style="color:var(--muted)">Más autos → mayor prioridad</span>
+        </div>
+        <div class="decision-row">
+          <div class="decision-icon" id="dec2">02</div>
+          <span style="color:var(--muted)">Prioridad máx 2 turnos seguidos</span>
+        </div>
+        <div class="decision-row">
+          <div class="decision-icon" id="dec3">03</div>
+          <span style="color:var(--muted)">Sin autos → cede paso inmediato</span>
+        </div>
+        <div class="decision-row">
+          <div class="decision-icon" id="dec4">04</div>
+          <span style="color:var(--muted)">Empate → alterna carril</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULATION CONTROLS -->
+    <div class="info-panel">
+      <div class="panel-title">Simulación Manual</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:2px;">VÍA A — TASA DE LLEGADA (EN ROJO)</div>
+        <div class="controls" id="rateButtonsA">
+          <button class="btn rate-btn" data-lane="A" data-rate="1" onclick="setArrivalRate('A',1)">1s</button>
+          <button class="btn rate-btn active" data-lane="A" data-rate="3" onclick="setArrivalRate('A',3)">3s</button>
+          <button class="btn rate-btn" data-lane="A" data-rate="5" onclick="setArrivalRate('A',5)">5s</button>
+          <button class="btn rate-btn" data-lane="A" data-rate="7" onclick="setArrivalRate('A',7)">7s</button>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:4px;">VÍA B — TASA DE LLEGADA (EN ROJO)</div>
+        <div class="controls" id="rateButtonsB">
+          <button class="btn rate-btn" data-lane="B" data-rate="1" onclick="setArrivalRate('B',1)">1s</button>
+          <button class="btn rate-btn active" data-lane="B" data-rate="3" onclick="setArrivalRate('B',3)">3s</button>
+          <button class="btn rate-btn" data-lane="B" data-rate="5" onclick="setArrivalRate('B',5)">5s</button>
+          <button class="btn rate-btn" data-lane="B" data-rate="7" onclick="setArrivalRate('B',7)">7s</button>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;line-height:1.6;">
+          <span style="color:var(--green);">▸ VERDE</span>: −1 auto cada 3s<br>
+          <span style="color:var(--red);">▸ ROJO</span>: +1 auto según tasa elegida
+        </div>
+      </div>
+    </div>
+
+    <!-- ARDUINO OUTPUT -->
+    <div class="info-panel">
+      <div class="panel-title">Señal CPU</div>
+      <div class="arduino-row">
+        <div class="arduino-dot"></div>
+        TERMINAL
+      </div>
+      <div style="background:#04070a;border:1px solid var(--border);padding:12px;font-family:'Share Tech Mono',monospace;font-size:0.78rem;">
+        <div style="color:var(--muted);margin-bottom:6px;">&gt; Último mensaje enviado:</div>
+        <div id="serialOutput" style="color:var(--green);">VERDE,ROJO</div>
+        <div style="color:var(--muted);margin-top:8px;font-size:0.65rem;">&gt; Formato: estadoA,estadoB\n</div>
+        <div style="color:var(--muted);font-size:0.65rem;" id="serialCount">&gt; Mensajes: 0</div>
+      </div>
+    </div>
+
+    <!-- EVENT LOG -->
+    <div class="log-panel">
+      <div class="panel-title">Log de Eventos</div>
+      <div class="log-list" id="logList"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// === STATE ===
+const CICLO_VERDE = 30;
+const AMARILLO_NORMAL = 3;
+const AMARILLO_RAPIDO = 1;
+const VERDE_DESCARGA_INTERVALO = 3000; // ms: cada 3s se resta 1 auto en verde
+
+let state = {
+  countA: 3,
+  countB: 1,
+  estadoA: "ROJO",
+  estadoB: "ROJO",
+  semaforo_actual: null,
+  ultimo_ganador: null,
+  prioridadA: 0,
+  prioridadB: 0,
+  tiempo_estado: Date.now(),
+  serialCount: 0,
+  // Tasa de llegada en rojo (ms)
+  arrivalRateA: 3000,
+  arrivalRateB: 3000,
+  // Acumuladores de tiempo para llegada/descarga
+  lastArrivalA: Date.now(),
+  lastArrivalB: Date.now(),
+  lastDischargeGreen: Date.now(),
+};
+
+// === LOG ===
+function addLog(msg, type = 'info') {
+  const list = document.getElementById('logList');
+  const now = new Date();
+  const t = now.toTimeString().slice(0,8);
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.innerHTML = `<span class="log-time">${t}</span><span class="log-msg ev-${type}">${msg}</span>`;
+  list.prepend(el);
+  while (list.children.length > 20) list.removeChild(list.lastChild);
+}
+
+// === UPDATE UI ===
+function updateSemaphore(lane, estado) {
+  const r = document.getElementById(`light${lane}-r`);
+  const y = document.getElementById(`light${lane}-y`);
+  const g = document.getElementById(`light${lane}-g`);
+  r.className = 'light r' + (estado === 'ROJO' ? ' on' : '');
+  y.className = 'light y' + (estado === 'AMARILLO' ? ' on' : '');
+  g.className = 'light g' + (estado === 'VERDE' ? ' on' : '');
+}
+
+function updateBadge(lane, estado) {
+  const b = document.getElementById(`badge${lane}`);
+  b.textContent = estado;
+  b.className = 'badge ' + estado.toLowerCase();
+}
+
+function updateCard(lane, estado) {
+  const card = document.getElementById(`card${lane}`);
+  card.classList.toggle('active', estado === 'VERDE');
+}
+
+function updateCount(lane, count) {
+  document.getElementById(`count${lane}`).textContent = count;
+  const pct = Math.min(100, count * 12.5);
+  document.getElementById(`bar${lane}`).style.width = pct + '%';
+}
+
+function updatePriority(lane, val) {
+  const pips = document.getElementById(`pip${lane}`).querySelectorAll('.priority-pip');
+  document.getElementById(`prio${lane}`).innerHTML = `${val}<span style="font-size:1rem;color:var(--muted)">/2</span>`;
+  pips.forEach((p, i) => p.classList.toggle('filled', i < val));
+}
+
+function updateTimer(lane, elapsed, maxTime, estado) {
+  const pct = Math.min(100, (elapsed / maxTime) * 100);
+  const fill = document.getElementById(`timerFill${lane}`);
+  fill.style.width = pct + '%';
+  fill.className = 'timer-fill ' + estado.toLowerCase();
+  document.getElementById(`timerText${lane}`).textContent = elapsed.toFixed(1) + 's';
+}
+
+function updateActiveLabel() {
+  const lbl = document.getElementById('activeLabel');
+  lbl.textContent = state.semaforo_actual ? `VÍA ${state.semaforo_actual}` : '—';
+  const aActive = state.estadoA === 'VERDE';
+  const bActive = state.estadoB === 'VERDE';
+  ['roadA-glow','roadA-glow2'].forEach(id => {
+    document.getElementById(id).setAttribute('fill', aActive ? 'rgba(0,230,118,0.12)' : 'transparent');
+  });
+  ['roadB-glow','roadB-glow2'].forEach(id => {
+    document.getElementById(id).setAttribute('fill', bActive ? 'rgba(0,230,118,0.12)' : 'transparent');
+  });
+}
+
+function sendSerial() {
+  const msg = `${state.estadoA},${state.estadoB}`;
+  document.getElementById('serialOutput').textContent = msg;
+  state.serialCount++;
+  document.getElementById('serialCount').textContent = `> Mensajes: ${state.serialCount}`;
+}
+
+// === TRAFFIC LOGIC ===
+function calcularAmarillo(count) {
+  return count <= 3 ? AMARILLO_RAPIDO : AMARILLO_NORMAL;
+}
+
+function tickLogic() {
+  const now = Date.now();
+  const elapsed = (now - state.tiempo_estado) / 1000;
+  let cambio = false;
+
+  // INIT
+  if (state.semaforo_actual === null) {
+    if (state.countA >= state.countB) state.semaforo_actual = 'A';
+    else state.semaforo_actual = 'B';
+    state.estadoA = state.semaforo_actual === 'A' ? 'VERDE' : 'ROJO';
+    state.estadoB = state.semaforo_actual === 'B' ? 'VERDE' : 'ROJO';
+    state.ultimo_ganador = state.semaforo_actual;
+    state.tiempo_estado = now;
+    state.lastDischargeGreen = now;
+    cambio = true;
+    addLog(`Sistema iniciado — Vía ${state.semaforo_actual} activa`, 'verde');
+  }
+
+  else if (state.semaforo_actual === 'A') {
+    if (state.estadoA === 'VERDE' && (elapsed >= CICLO_VERDE || (state.countA === 0 && state.countB > 0))) {
+      state.estadoA = 'AMARILLO';
+      state.tiempo_estado = now;
+      cambio = true;
+      addLog('Vía A → AMARILLO', 'amarillo');
+    }
+    else if (state.estadoA === 'AMARILLO' && elapsed >= calcularAmarillo(state.countA)) {
+      let siguiente;
+      if (state.countB > state.countA && state.countB > 0 && state.prioridadB < 2) siguiente = 'B';
+      else if (state.countA > state.countB && state.countA > 0 && state.prioridadA < 2) siguiente = 'A';
+      else if (state.countA === state.countB) siguiente = state.ultimo_ganador === 'A' ? 'B' : 'A';
+      else siguiente = 'B';
+
+      if (siguiente === 'A' && state.countA > 0) { state.prioridadA++; state.prioridadB = 0; }
+      else if (siguiente === 'B' && state.countB > 0) { state.prioridadB++; state.prioridadA = 0; }
+      else { state.prioridadA = 0; state.prioridadB = 0; }
+
+      state.semaforo_actual = siguiente;
+      state.ultimo_ganador = siguiente;
+      state.estadoA = siguiente === 'A' ? 'VERDE' : 'ROJO';
+      state.estadoB = siguiente === 'B' ? 'VERDE' : 'ROJO';
+      state.tiempo_estado = now;
+      state.lastDischargeGreen = now;
+      cambio = true;
+      addLog(`Cambio → Vía ${siguiente} VERDE (A:${state.countA} B:${state.countB})`, 'verde');
+    }
+  }
+
+  else if (state.semaforo_actual === 'B') {
+    if (state.estadoB === 'VERDE' && (elapsed >= CICLO_VERDE || (state.countB === 0 && state.countA > 0))) {
+      state.estadoB = 'AMARILLO';
+      state.tiempo_estado = now;
+      cambio = true;
+      addLog('Vía B → AMARILLO', 'amarillo');
+    }
+    else if (state.estadoB === 'AMARILLO' && elapsed >= calcularAmarillo(state.countB)) {
+      let siguiente;
+      if (state.countA > state.countB && state.countA > 0 && state.prioridadA < 2) siguiente = 'A';
+      else if (state.countB > state.countA && state.countB > 0 && state.prioridadB < 2) siguiente = 'B';
+      else if (state.countA === state.countB) siguiente = state.ultimo_ganador === 'B' ? 'A' : 'B';
+      else siguiente = 'A';
+
+      if (siguiente === 'A' && state.countA > 0) { state.prioridadA++; state.prioridadB = 0; }
+      else if (siguiente === 'B' && state.countB > 0) { state.prioridadB++; state.prioridadA = 0; }
+      else { state.prioridadA = 0; state.prioridadB = 0; }
+
+      state.semaforo_actual = siguiente;
+      state.ultimo_ganador = siguiente;
+      state.estadoA = siguiente === 'A' ? 'VERDE' : 'ROJO';
+      state.estadoB = siguiente === 'B' ? 'VERDE' : 'ROJO';
+      state.tiempo_estado = now;
+      state.lastDischargeGreen = now;
+      cambio = true;
+      addLog(`Cambio → Vía ${siguiente} VERDE (A:${state.countA} B:${state.countB})`, 'verde');
+    }
+  }
+
+  // === DESCARGA VERDE: -1 auto cada 3s en el carril activo ===
+  if (state.semaforo_actual !== null && (now - state.lastDischargeGreen) >= VERDE_DESCARGA_INTERVALO) {
+    state.lastDischargeGreen = now;
+    if (state.estadoA === 'VERDE' && state.countA > 0) {
+      state.countA--;
+    } else if (state.estadoB === 'VERDE' && state.countB > 0) {
+      state.countB--;
+    }
+  }
+
+  // === LLEGADA EN ROJO: +1 auto según tasa configurada ===
+  if (state.estadoA === 'ROJO' && (now - state.lastArrivalA) >= state.arrivalRateA) {
+    state.lastArrivalA = now;
+    state.countA++;
+  }
+  if (state.estadoB === 'ROJO' && (now - state.lastArrivalB) >= state.arrivalRateB) {
+    state.lastArrivalB = now;
+    state.countB++;
+  }
+
+  // Update timers
+  const elapsedNow = (Date.now() - state.tiempo_estado) / 1000;
+  const maxA = state.estadoA === 'VERDE' ? CICLO_VERDE : state.estadoA === 'AMARILLO' ? calcularAmarillo(state.countA) : 1;
+  const maxB = state.estadoB === 'VERDE' ? CICLO_VERDE : state.estadoB === 'AMARILLO' ? calcularAmarillo(state.countB) : 1;
+
+  if (state.semaforo_actual === 'A') {
+    updateTimer('A', elapsedNow, maxA, state.estadoA);
+    updateTimer('B', 0, 1, 'ROJO');
+  } else {
+    updateTimer('B', elapsedNow, maxB, state.estadoB);
+    updateTimer('A', 0, 1, 'ROJO');
+  }
+
+  // Render UI
+  updateSemaphore('A', state.estadoA);
+  updateSemaphore('B', state.estadoB);
+  updateBadge('A', state.estadoA);
+  updateBadge('B', state.estadoB);
+  updateCard('A', state.estadoA);
+  updateCard('B', state.estadoB);
+  updateCount('A', state.countA);
+  updateCount('B', state.countB);
+  updatePriority('A', state.prioridadA);
+  updatePriority('B', state.prioridadB);
+  updateActiveLabel();
+
+  if (cambio) sendSerial();
+}
+
+// === ARRIVAL RATE CONTROL ===
+function setArrivalRate(lane, rateSeconds) {
+  const rateMs = Math.round(rateSeconds * 1000);
+  if (lane === 'A') {
+    state.arrivalRateA = rateMs;
+    state.lastArrivalA = Date.now();
+  } else {
+    state.arrivalRateB = rateMs;
+    state.lastArrivalB = Date.now();
+  }
+  // Update button active states
+  document.querySelectorAll(`[data-lane="${lane}"].rate-btn`).forEach(btn => {
+    btn.classList.toggle('active', parseFloat(btn.dataset.rate) === rateSeconds);
+  });
+  addLog(`Vía ${lane}: llegada cada ${rateSeconds}s en rojo`, 'info');
+}
+
+// === TICK ===
+setInterval(tickLogic, 100);
+addLog('Dashboard iniciado — SemáforoIA v2.0', 'info');
+</script>
+</body>
+</html>
